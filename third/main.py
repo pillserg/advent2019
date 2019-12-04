@@ -11,39 +11,34 @@ class Direction(Enum):
 
 
 def parse_wire_input(data: str):
-    vec_rep = [(0, 0)]
-    current_pos = vec_rep[0]
+    vec_rep = {(0, 0): True}
+    pointer = (0, 0)
 
     for cmd in data.split(','):
         direction, interval = Direction(cmd[0]), int(cmd[1:])
         for i in range(interval):
             if direction == Direction.R:
-                vec_rep.append((current_pos[0], current_pos[1] + 1))
+                pointer = (pointer[0], pointer[1] + 1)
             elif direction == Direction.L:
-                vec_rep.append((current_pos[0], current_pos[1] - 1))
+                pointer = (pointer[0], pointer[1] - 1)
             elif direction == Direction.U:
-                vec_rep.append((current_pos[0] + 1, current_pos[1]))
+                pointer = (pointer[0] + 1, pointer[1])
             elif direction == Direction.D:
-                vec_rep.append((current_pos[0] - 1, current_pos[1]))
-            current_pos = vec_rep[-1] 
-    print(f'vec parsed, len {len(vec_rep)}')
+                pointer = (pointer[0] - 1, pointer[1])
+            vec_rep[pointer] = True
     return vec_rep
 
 
 def find_crossections(vec1: list, vec2: list) -> list:
     ret = []
     for idx, (x, y) in enumerate(vec1):
-        if not idx % 100:
-            print(f'{idx} elems processed from {len(vec1)}')
         if (x, y) == (0, 0):
             # skip origin
             continue
 
         if (x, y) in vec2:
-            print(f'cross: {(x, y)}')
             ret.append((x, y)) 
 
-    print(f'cross found, len: {len(ret)}')
     return ret
 
 
@@ -65,7 +60,7 @@ def find_closest_crossection(d1, d2):
 
 class TestWires(unittest.TestCase):
     def test_convert_to_vector(self):
-        self.assertEqual(parse_wire_input('R1,U2'), [(0,0), (0, 1), (1, 1), (2, 1)])
+        self.assertEqual(parse_wire_input('R1,U2'), {(0, 0): True, (0, 1): True, (1, 1): True, (2, 1): True})
 
     def test_find_crosssections(self):
         self.assertEqual(find_crossections(parse_wire_input('R1,U2'), parse_wire_input('R1')), [(0, 1)])
